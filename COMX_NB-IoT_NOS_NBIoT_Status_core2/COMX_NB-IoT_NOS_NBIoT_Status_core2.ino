@@ -8,7 +8,7 @@
 #include "SPIFFS.h"
 
 char thingsboard_url[] = "iot-dev.nos.pt";
-String AccessToken = "AASMIy7fMxZX8qbnurE9";
+
 
 char aux_str[100];
 char port[] = "80";                    // PORT Connected on
