@@ -3,20 +3,15 @@
 
 #include <stdint.h>
 #include <vector>
-//#include "Adafruit_Sensor.h"
-//#include <Adafruit_BMP280.h>
-#include "M5_ENV.h"
+
 #include <ArduinoJson.h> //For Creating a Json File
 
 DynamicJsonBuffer jsonBuffer;                                 //Set Buffer size to Dynamic
 JsonObject& root = jsonBuffer.createObject();               //Create an object 'root' which is called later to print JSON Buffer
 
 
-SHT3X sht30;
-QMP6988 qmp6988;
-
 int lengthOfJSON, interval = 750000;
-float tmp = 0.0, hum = 0.0, pressure = 0.0;
+
 char aux_str[100];
 char port[] = "80";                    // HTTP PORT
 String getStr = "";
@@ -24,7 +19,7 @@ long previousMillis;
 bool forceSend = true;
 
 char thingsboard_url[] = "iot-dev.nos.pt";
-String AccessToken = "CHAVE";
+String AccessToken = "QWPS6Zi6AhER0hzOzHHU";
 
 
 TFT_eSprite Disbuff = TFT_eSprite(&M5.Lcd);
@@ -148,57 +143,22 @@ void updateThingsboard()
   sendATcommand2("AT+CIPSHUT", "OK", "ERROR", 10000);
 }//updateThingsboard
 
-void makeJson( float val1, float val2, float val3)
-{
-  Serial.println("\nMaking JSON text meanwhile\n");
-  root["temperature"] = val1;
-  root["humidity"] = val2;
-  root["pressure"] = val3;
-    String json1 = "";
-      root.printTo(json1); 
-      Serial.println(json1);
-}
-
-void getData() {
-
-  pressure = qmp6988.calcPressure();
-  if (sht30.get() == 0) { //Obtain the data of shT30.  获取sht30的数据
-    tmp = sht30.cTemp;  //Store the temperature obtained from shT30.  将sht30获取到的温度存储
-    hum = sht30.humidity; //Store the humidity obtained from the SHT30.  将sht30获取到的湿度存储
-  } else {
-    tmp = 0, hum = 0;
-  }
-  //
-  //  bme.begin(0x76);
-  //  pressure = bme.readPressure();  //Stores the pressure gained by BMP.
-  //  sht30.get();  //Obtain the data of shT30.
-  //  tmp = sht30.cTemp;  //Store the temperature obtained from shT30.
-  //  hum = sht30.humidity; //Store the humidity obtained from the SHT30.
-}
-
 
 void setup()
 {
 
   M5.begin();
   M5.Lcd.begin();
+  M5.Lcd.drawBmpFile(SPIFFS, "/nos_smile.bmp", 0, 0);
 
   //Serial1.begin(115200, SERIAL_8N1, 5, 13);
   //Serial1.begin(115200, SERIAL_8N1, 16, 17);
   Serial1.begin(115200, SERIAL_8N1, 13, 14);
 
-
-  Wire.begin(); //Wire init, adding the I2C bus.  Wire初始化, 加入i2c总线
-
-  qmp6988.init();
-
   Disbuff.createSprite(320, 20);
   Disbuff.fillRect(0, 0, 320, 20, BLACK);
   Disbuff.drawRect(0, 0, 320, 20, Disbuff.color565(36, 36, 36));
   Disbuff.pushSprite(0, 0);
-
-  pinMode(2, OUTPUT);
-  digitalWrite(2, 0);
 
   Disbuff.setTextColor(WHITE);
   Disbuff.setTextSize(1);
@@ -211,42 +171,34 @@ void setup()
     Disbuff.pushSprite(0, 0);
     delay(10);
   }
-  digitalWrite(2, 1);
 
   Disbuff.fillRect(0, 0, 320, 20, Disbuff.color565(36, 36, 36));
   Disbuff.setCursor(7, 7);
-  Disbuff.printf("NOS HUB 5G - NB-IoT Starter Kit - Environment Demo");
+  Disbuff.printf("NOS HUB 5G - NB-IoT Starter Kit - Reaction Demo");
   Disbuff.pushSprite(0, 0);
 }
 
-void dataLCD() {
-  getData(); //update from sensor
-  M5.Lcd.setTextSize(2);
-  String tempS = "Temperatura: ";
-  tempS += tmp;
-  M5.Lcd.drawString(tempS, 20, 30);
-  String humS = "Humidade: ";
-  humS += hum;
-  M5.Lcd.drawString(humS, 20, 50);
-  String presS = "Pressao Atm: ";
-  presS += pressure;
-  M5.Lcd.drawString(presS, 20, 70);
-}
 
 void loop()
 {
+
   unsigned long currentMillis = millis();
   int timepassed = currentMillis - previousMillis;
 
-  if (timepassed >= interval or forceSend) {
+  if (timepassed >= interval) {
+    Serial.println("\nMaking JSON text\n");
+    root["reaction"] = 0;
+    String json1 = "";
+    root.printTo(json1);
+    Serial.println(json1);
+    forceSend = true;
+  }
+
+  if (forceSend) {
     previousMillis = currentMillis;
     M5.Lcd.setTextSize(2);
     M5.Lcd.drawString("SENDING DATA!           ", 20, 150);
-    dataLCD();
     M5.update();
-
-    getData();
-    makeJson(tmp, hum, pressure);                    //Making JSON text here
     updateThingsboard();
     forceSend = false;
   } else {
@@ -257,10 +209,37 @@ void loop()
     M5.Lcd.drawString(timeS, 20, 150);
   }
 
-  if (M5.BtnA.wasPressed() or M5.BtnB.wasPressed() or M5.BtnC.wasPressed())  forceSend = true;
+  if (M5.BtnA.wasPressed()) {
+
+    Serial.println("\nA - Making JSON text\n");
+    root["reaction"] = 1;
+    String json1 = "";
+    root.printTo(json1);
+    Serial.println(json1);
+    forceSend = true;
+  }
+
+  if (M5.BtnB.wasPressed()) {
+    Serial.println("\nB - Making JSON text\n");
+    root["reaction"] = 2;
+    String json1 = "";
+    root.printTo(json1);
+    Serial.println(json1);
+    forceSend = true;
+  }
+
+  if (M5.BtnC.wasPressed()) {
+    Serial.println("\nC - Making JSON text\n");
+    root["reaction"] = 3;
+    String json1 = "";
+    root.printTo(json1);
+    Serial.println(json1);
+    forceSend = true;
+  }
+
 
   M5.Lcd.setTextSize(1);
-  M5.Lcd.drawString("Pressionar qualquer botao para forcar envio...", 15, 225);
+  M5.Lcd.drawString("Pressionar qualquer botao para enviar...", 15, 225);
   M5.update();
 
 }
