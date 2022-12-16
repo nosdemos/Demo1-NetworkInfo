@@ -124,10 +124,10 @@ void updateThingsboard()
       delay(100);
       if (sendATcommand2(getStr, "SEND OK", "ERROR", 10000)) { //Sending Data Here
         M5.Lcd.setTextSize(1);
-        M5.Lcd.drawString("OK", 300, 0);
+        M5.Lcd.drawString("    OK ", 280, 0);
       } else {
         M5.Lcd.setTextSize(1);
-        M5.Lcd.drawString("ERRO!", 280, 0);
+        M5.Lcd.drawString("ERRO! ", 280, 0);
       }
     }
     Serial.println("Closing the Socket!");
@@ -201,7 +201,7 @@ void loop()
 
   if (forceSend) {
     previousMillis = currentMillis;
-    M5.Lcd.drawString("Sending...", 280, 0);
+    M5.Lcd.drawString("Sending", 280, 0);
     M5.update();
     updateThingsboard();
     forceSend = false;
