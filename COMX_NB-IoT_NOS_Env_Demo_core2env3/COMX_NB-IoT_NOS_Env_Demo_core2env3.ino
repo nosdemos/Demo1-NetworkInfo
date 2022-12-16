@@ -3,14 +3,11 @@
 
 #include <stdint.h>
 #include <vector>
-//#include "Adafruit_Sensor.h"
-//#include <Adafruit_BMP280.h>
 #include "M5_ENV.h"
 #include <ArduinoJson.h> //For Creating a Json File
 
 DynamicJsonBuffer jsonBuffer;                                 //Set Buffer size to Dynamic
 JsonObject& root = jsonBuffer.createObject();               //Create an object 'root' which is called later to print JSON Buffer
-
 
 SHT3X sht30;
 QMP6988 qmp6988;
@@ -25,7 +22,6 @@ bool forceSend = true;
 
 char thingsboard_url[] = "iot-dev.nos.pt";
 String AccessToken = "CHAVE";
-
 
 TFT_eSprite Disbuff = TFT_eSprite(&M5.Lcd);
 
@@ -131,7 +127,7 @@ void updateThingsboard()
       delay(100);
       if (sendATcommand2(getStr, "SEND OK", "ERROR", 10000)) { //Sending Data Here
         M5.Lcd.setTextSize(1);
-        M5.Lcd.drawString("Ultimo envio: OK", 20, 170);
+        M5.Lcd.drawString("Ultimo envio: OK    ", 20, 170);
       } else {
         M5.Lcd.setTextSize(1);
         M5.Lcd.drawString("Ultimo envio: ERRO!", 20, 170);
@@ -162,24 +158,18 @@ void makeJson( float val1, float val2, float val3)
 void getData() {
 
   pressure = qmp6988.calcPressure();
+  
   if (sht30.get() == 0) { //Obtain the data of shT30.  获取sht30的数据
     tmp = sht30.cTemp;  //Store the temperature obtained from shT30.  将sht30获取到的温度存储
     hum = sht30.humidity; //Store the humidity obtained from the SHT30.  将sht30获取到的湿度存储
   } else {
     tmp = 0, hum = 0;
   }
-  //
-  //  bme.begin(0x76);
-  //  pressure = bme.readPressure();  //Stores the pressure gained by BMP.
-  //  sht30.get();  //Obtain the data of shT30.
-  //  tmp = sht30.cTemp;  //Store the temperature obtained from shT30.
-  //  hum = sht30.humidity; //Store the humidity obtained from the SHT30.
 }
 
 
 void setup()
 {
-
   M5.begin();
   M5.Lcd.begin();
 

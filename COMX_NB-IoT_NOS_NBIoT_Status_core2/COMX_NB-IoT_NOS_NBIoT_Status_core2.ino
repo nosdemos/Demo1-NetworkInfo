@@ -7,11 +7,7 @@
 #include "FS.h"
 #include "SPIFFS.h"
 
-char thingsboard_url[] = "iot-dev.nos.pt";
-
-
 char aux_str[100];
-char port[] = "80";                    // PORT Connected on
 String getStr = "";
 
 TFT_eSprite Disbuff = TFT_eSprite(&M5.Lcd);

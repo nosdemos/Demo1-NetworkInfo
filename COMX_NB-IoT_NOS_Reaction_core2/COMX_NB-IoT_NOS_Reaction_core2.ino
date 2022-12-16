@@ -9,7 +9,6 @@
 DynamicJsonBuffer jsonBuffer;                                 //Set Buffer size to Dynamic
 JsonObject& root = jsonBuffer.createObject();               //Create an object 'root' which is called later to print JSON Buffer
 
-
 int lengthOfJSON, interval = 750000;
 
 char aux_str[100];
@@ -19,8 +18,7 @@ long previousMillis;
 bool forceSend = true;
 
 char thingsboard_url[] = "iot-dev.nos.pt";
-String AccessToken = "QWPS6Zi6AhER0hzOzHHU";
-
+String AccessToken = "CHAVE";
 
 TFT_eSprite Disbuff = TFT_eSprite(&M5.Lcd);
 
@@ -126,10 +124,10 @@ void updateThingsboard()
       delay(100);
       if (sendATcommand2(getStr, "SEND OK", "ERROR", 10000)) { //Sending Data Here
         M5.Lcd.setTextSize(1);
-        M5.Lcd.drawString("Ultimo envio: OK", 20, 170);
+        M5.Lcd.drawString("OK", 300, 0);
       } else {
         M5.Lcd.setTextSize(1);
-        M5.Lcd.drawString("Ultimo envio: ERRO!", 20, 170);
+        M5.Lcd.drawString("ERRO!", 280, 0);
       }
     }
     Serial.println("Closing the Socket!");
@@ -149,7 +147,11 @@ void setup()
 
   M5.begin();
   M5.Lcd.begin();
-  M5.Lcd.drawBmpFile(SPIFFS, "/nos_smile.bmp", 0, 0);
+
+  if (!SPIFFS.begin(true)) {
+    Serial.println("SPIFFS Mount Failed");
+    return;
+  }
 
   //Serial1.begin(115200, SERIAL_8N1, 5, 13);
   //Serial1.begin(115200, SERIAL_8N1, 16, 17);
@@ -176,6 +178,9 @@ void setup()
   Disbuff.setCursor(7, 7);
   Disbuff.printf("NOS HUB 5G - NB-IoT Starter Kit - Reaction Demo");
   Disbuff.pushSprite(0, 0);
+
+  M5.Lcd.drawBmpFile(SPIFFS, "/nos_smile.bmp", 0, 0);
+  M5.update();
 }
 
 
@@ -196,17 +201,10 @@ void loop()
 
   if (forceSend) {
     previousMillis = currentMillis;
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.drawString("SENDING DATA!           ", 20, 150);
+    M5.Lcd.drawString("Sending...", 280, 0);
     M5.update();
     updateThingsboard();
     forceSend = false;
-  } else {
-    M5.Lcd.setTextSize(2);
-    String timeS = "Tempo ate enviar: ";
-    timeS += (interval - timepassed) / 1000;
-    timeS += "    ";
-    M5.Lcd.drawString(timeS, 20, 150);
   }
 
   if (M5.BtnA.wasPressed()) {
@@ -239,7 +237,7 @@ void loop()
 
 
   M5.Lcd.setTextSize(1);
-  M5.Lcd.drawString("Pressionar qualquer botao para enviar...", 15, 225);
+  M5.Lcd.drawString("Pressiona um botao para enviar...", 62, 230);
   M5.update();
 
 }
